@@ -6,6 +6,7 @@
 [![MCP](https://img.shields.io/badge/Model_Context_Protocol-black)](https://modelcontextprotocol.io/)
 [![Agent Framework](https://img.shields.io/badge/Microsoft_Agent_Framework-preview-0078D4?logo=microsoft&logoColor=white)](https://github.com/microsoft/agent-framework)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![Publish Docker images to GHCR](https://github.com/ppiova/mcp-docker-starter/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/ppiova/mcp-docker-starter/actions/workflows/docker-publish.yml)
 
 **Two containers. One agent conversation.**
 
@@ -45,6 +46,41 @@ A **Python MCP server** and a **Microsoft Agent Framework (.NET) client** wired 
 
 - Docker Desktop (or Docker Engine + Compose v2)
 - An **Azure OpenAI** resource with a chat deployment (e.g. `gpt-4o-mini`)
+
+---
+
+## Pull from GHCR (skip the build)
+
+Both components ship as multi-arch images (`linux/amd64` + `linux/arm64`) with SBOM and build provenance:
+
+| Image                                                       | Package                                                                            |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `ghcr.io/ppiova/mcp-docker-starter/mcp-server:latest`       | [view](https://github.com/ppiova/mcp-docker-starter/pkgs/container/mcp-docker-starter%2Fmcp-server)   |
+| `ghcr.io/ppiova/mcp-docker-starter/agent-client:latest`     | [view](https://github.com/ppiova/mcp-docker-starter/pkgs/container/mcp-docker-starter%2Fagent-client) |
+
+Drop this `compose.ghcr.yaml` next to your `.env` and skip the local build entirely:
+
+```yaml
+services:
+  mcp-server:
+    image: ghcr.io/ppiova/mcp-docker-starter/mcp-server:latest
+    ports: ["8000:8000"]
+    networks: [mcp-net]
+  agent-client:
+    image: ghcr.io/ppiova/mcp-docker-starter/agent-client:latest
+    depends_on: [mcp-server]
+    env_file: [.env]
+    environment:
+      MCP_SERVER_URL: "http://mcp-server:8000/mcp"
+    networks: [mcp-net]
+    stdin_open: true
+    tty: true
+networks: { mcp-net: {} }
+```
+
+```bash
+docker compose -f compose.ghcr.yaml up
+```
 
 ---
 
