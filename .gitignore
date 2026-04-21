@@ -1,0 +1,27 @@
+# ---- .NET ----
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# ---- Python ----
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# ---- Env ----
+.env
+.env.*
+!.env.example
+
+# ---- IDE ----
+.idea/
+.vscode/
+!.vscode/extensions.json
+
+# ---- OS ----
+.DS_Store
+Thumbs.db

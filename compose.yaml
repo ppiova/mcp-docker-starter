@@ -1,0 +1,41 @@
+name: mcp-docker-starter
+
+services:
+
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    image: tasks-mcp-server:latest
+    container_name: mcp-tasks-server
+    environment:
+      MCP_HOST: "0.0.0.0"
+      MCP_PORT: "8000"
+    ports:
+      - "8000:8000"      # optional — handy for inspecting with curl / MCP Inspector
+    networks:
+      - mcp-net
+    restart: unless-stopped
+
+  agent-client:
+    build:
+      context: .
+      dockerfile: agent-client/Dockerfile
+    image: agent-client:latest
+    container_name: mcp-agent-client
+    depends_on:
+      mcp-server:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      MCP_SERVER_URL: "http://mcp-server:8000/sse"
+    networks:
+      - mcp-net
+    # Keep stdin for interactive streaming output
+    stdin_open: true
+    tty: true
+
+networks:
+  mcp-net:
+    driver: bridge

@@ -1,0 +1,17 @@
+**/bin/
+**/obj/
+**/__pycache__/
+**/*.pyc
+**/.vs/
+**/.vscode/
+**/.idea/
+**/.pytest_cache/
+.git/
+.github/
+.devcontainer/
+.env
+.env.*
+!.env.example
+*.md
+README.md
+LICENSE

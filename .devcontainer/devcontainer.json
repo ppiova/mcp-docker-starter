@@ -1,0 +1,27 @@
+{
+  "name": "MCP Docker Starter",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers/features/dotnet:2": { "version": "8.0" },
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.12" }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "ms-python.python",
+        "ms-azuretools.vscode-docker",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ]
+    }
+  },
+
+  "postCreateCommand": "pip install -r mcp-server/requirements.txt && dotnet restore agent-client/AgentClient.csproj",
+  "remoteUser": "codespace"
+}
