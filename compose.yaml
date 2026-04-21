@@ -29,7 +29,7 @@ services:
     env_file:
       - .env
     environment:
-      MCP_SERVER_URL: "http://mcp-server:8000/sse"
+      MCP_SERVER_URL: "http://mcp-server:8000/mcp"
     networks:
       - mcp-net
     # Keep stdin for interactive streaming output

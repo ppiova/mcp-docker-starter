@@ -1,8 +1,8 @@
 """
-Minimal MCP server exposed over SSE transport.
+Minimal MCP server exposed over Streamable HTTP transport.
 
 Runs as an independent container. Any MCP-compatible client can connect to:
-    http://<host>:8000/sse
+    http://<host>:8000/mcp
 
 Tools exposed:
     - list_tasks(status?)        list tasks (optionally filtered)
@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 from typing import Literal
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 Priority = Literal["low", "medium", "high"]
 Status = Literal["open", "done"]
@@ -51,11 +52,21 @@ def _seed() -> None:
 
 _seed()
 
+# DNS-rebinding protection blocks non-localhost Host headers by default.
+# Inside Docker Compose the client reaches us via the service name ("mcp-server"),
+# so we add the expected hosts to the allow-list. Extra names can be passed in
+# MCP_ALLOWED_HOSTS (comma-separated) — useful behind a reverse proxy.
+_default_hosts = ["mcp-server", "mcp-server:8000", "localhost", "localhost:8000", "127.0.0.1", "127.0.0.1:8000"]
+_extra_hosts = [h.strip() for h in os.environ.get("MCP_ALLOWED_HOSTS", "").split(",") if h.strip()]
+
 mcp = FastMCP(
     name="tasks-mcp",
     instructions=(
         "An in-memory task tracker. Use the available tools to list, add and "
         "complete tasks. All state lives inside this container only."
+    ),
+    transport_security=TransportSecuritySettings(
+        allowed_hosts=_default_hosts + _extra_hosts,
     ),
 )
 
@@ -111,5 +122,5 @@ if __name__ == "__main__":
     port = int(os.environ.get("MCP_PORT", "8000"))
     mcp.settings.host = host
     mcp.settings.port = port
-    print(f"[tasks-mcp] SSE listening on http://{host}:{port}/sse", flush=True)
-    mcp.run(transport="sse")
+    print(f"[tasks-mcp] Streamable HTTP listening on http://{host}:{port}/mcp", flush=True)
+    mcp.run(transport="streamable-http")

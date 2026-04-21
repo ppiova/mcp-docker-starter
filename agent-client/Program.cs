@@ -13,7 +13,7 @@ var endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")
     ?? throw new InvalidOperationException("AZURE_OPENAI_ENDPOINT is not set.");
 var deployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME") ?? "gpt-4o-mini";
 var apiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
-var mcpUrl = Environment.GetEnvironmentVariable("MCP_SERVER_URL") ?? "http://mcp-server:8000/sse";
+var mcpUrl = Environment.GetEnvironmentVariable("MCP_SERVER_URL") ?? "http://mcp-server:8000/mcp";
 
 // --- 1. Wait for the MCP service to be reachable (compose healthcheck backstop) ---
 await WaitForEndpointAsync(mcpUrl, TimeSpan.FromSeconds(30));

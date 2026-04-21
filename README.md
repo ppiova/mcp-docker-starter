@@ -12,7 +12,7 @@
 A **Python MCP server** and a **Microsoft Agent Framework (.NET) client** wired together with **Docker Compose** — showing how to compose agents with remote tools over real service-to-service networking.
 
 ```
-┌──────────────────────┐        SSE: /sse         ┌──────────────────────┐
+┌──────────────────────┐  Streamable HTTP /mcp         ┌──────────────────────┐
 │  agent-client (.NET) │  ─────────────────────▶  │  mcp-server (Python) │
 │  Microsoft.Agents.AI │        JSON-RPC          │      FastMCP          │
 │  + Azure OpenAI      │                          │  list/add/complete    │
@@ -32,7 +32,7 @@ A **Python MCP server** and a **Microsoft Agent Framework (.NET) client** wired 
 | ----------------------------- | ---------------------------------------------- |
 | Polyglot compose (Python + .NET) | `compose.yaml`                              |
 | Service-to-service via bridge network | `networks: mcp-net`                    |
-| Service discovery by name     | Client connects to `http://mcp-server:8000/sse` |
+| Service discovery by name     | Client connects to `http://mcp-server:8000/mcp` |
 | Non-root containers           | Both `Dockerfile`s use dedicated system users  |
 | Healthcheck on the MCP server | `mcp-server/Dockerfile`                         |
 | Multi-stage .NET build, Alpine runtime | `agent-client/Dockerfile`             |
@@ -61,9 +61,9 @@ docker compose up --build
 You should see (abbreviated):
 
 ```
-mcp-tasks-server  | [tasks-mcp] SSE listening on http://0.0.0.0:8000/sse
+mcp-tasks-server  | [tasks-mcp] SSE listening on http://0.0.0.0:8000/mcp
 mcp-agent-client  | ✅ MCP host reachable at http://mcp-server:8000/
-mcp-agent-client  | 🔌 Connecting to MCP: http://mcp-server:8000/sse
+mcp-agent-client  | 🔌 Connecting to MCP: http://mcp-server:8000/mcp
 mcp-agent-client  | 🧰 MCP tools discovered: list_tasks, add_task, complete_task, stats
 mcp-agent-client  | > Prompt: Mostrame el estado actual de tareas...
 mcp-agent-client  | --- Respuesta (streaming) ---
@@ -100,8 +100,10 @@ It's exposed on `localhost:8000` for convenience. Use the official **[MCP Inspec
 
 ```bash
 npx @modelcontextprotocol/inspector
-# Then connect to http://localhost:8000/sse
+# Then connect to http://localhost:8000/mcp  (transport: streamable-http)
 ```
+
+> **Note on DNS-rebinding protection** — the Python MCP SDK rejects unknown Host headers by default. Inside Docker Compose the client reaches the server via the service name (`mcp-server:8000`), so we explicitly allow it via `TransportSecuritySettings(allowed_hosts=...)`. If you deploy behind a reverse proxy / ingress, add the extra hostnames through the `MCP_ALLOWED_HOSTS` env var (comma-separated).
 
 ---
 
